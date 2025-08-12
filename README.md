@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Buddies</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1 class="text-center py-3 bg-primary text-white shadow">Welcome to Bill Buddies</h1>
+    </header>
+    <main>
+        <!-- Full-Width Home Illustration with Get Started Button -->
+        <div id="home-section" class="container-fluid p-0 position-relative" style="min-height: 80vh;">
+            <img src="https://media.newyorker.com/photos/5b310f608bd74d505319ac2e/master/w_1920,c_limit/Dana-Split-The-=-Bill.jpg"
+                alt="Friends sharing a bill - Bill Buddies"
+                class="w-100 h-100" style="object-fit: cover; min-height: 80vh; filter: brightness(0.7);">
+            <div class="position-absolute top-50 start-50 translate-middle text-center" style="width:100%;">
+                <h1 class="display-3 fw-bold text-white text-shadow">Split Bills Easily</h1>
+                <p class="lead text-white text-shadow mb-4">Share expenses with friends and roommates.</p>
+                <button id="getStartedBtn" class="btn btn-warning btn-lg shadow">Get Started</button>
+            </div>
+        </div>
+
+        <div id="buddy-section" class="container rounded shadow-lg bg-light mt-5 p-4" style="display:none; max-width: 850px;">
+            <div class="text-center mt-4 mb-3">
+                <img src="https://wonderwall.sg/images/default-source/content/dam/wonderwall/images/2025/03/how-to-split-bills-fairly-without-losing-friends/split_bills_rectangle.jpg?sfvrsn=20e1d69_1"
+                    alt="Buddies group" class="rounded-circle mb-3 shadow" style="width: 120px; height: 120px; object-fit: cover;">
+                <h2 class="fw-bold text-primary">Add Buddy Details</h2>
+                <p class="text-muted">Manage your group easily. Select and delete buddies if needed.</p>
+            </div>
+            <form id="buddyForm">
+                <table class="table table-bordered align-middle table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width:40px;"><input type="checkbox" id="selectAll"></th>
+                            <th>Buddy Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Joining Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="buddyTableBody">
+                        <tr>
+                            <td><input type="checkbox" class="buddy-check"></td>
+                            <td><input type="text" class="form-control" name="name[]" required></td>
+                            <td><input type="number" class="form-control" name="age[]" min="1" required></td>
+                            <td>
+                                <select class="form-select" name="gender[]" required>
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </td>
+                            <td><input type="date" class="form-control" name="joiningDate[]" required></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="button" id="addBuddyBtn" class="btn btn-success me-2"><i class="bi bi-person-plus"></i> Add Buddy</button>
+                        <button type="button" id="deleteBuddyBtn" class="btn btn-danger"><i class="bi bi-trash"></i> Delete Selected</button>
+                    </div>
+                    <div>
+                        <button type="button" id="nextBtn" class="btn btn-primary me-2">Next</button>
+                        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Expenses Section -->
+        <div id="expenses-section" class="container mt-5 p-4 rounded shadow-lg bg-white" style="display:none; max-width: 1000px;">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold text-primary">Buddies Expenses Overview</h2>
+                <p class="text-muted">Track who paid, who owes, and visualize expenses.</p>
+            </div>
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered table-hover align-middle" id="expensesTable">
+                    <thead class="table-info">
+                        <tr>
+                            <th>Buddy Name</th>
+                            <th>Expenses Details</th>
+                            <th>Paid Amount</th>
+                            <th>Paid Date</th>
+                            <th>Pending Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesTableBody">
+                        <!-- Rows will be dynamically generated -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-center gap-3 mb-3">
+                <button type="button" id="backBtn" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</button>
+                <button type="button" id="payerBtn" class="btn btn-danger"><i class="bi bi-person-dash"></i> Payer</button>
+                <button type="button" id="payeeBtn" class="btn btn-success"><i class="bi bi-person-check"></i> Payee</button>
+                <button type="button" id="expenseChartBtn" class="btn btn-info"><i class="bi bi-bar-chart"></i> Expense Chart</button>
+            </div>
+            <div id="payerInfo" class="mb-3" style="display:none;"></div>
+            <div id="payeeInfo" class="mb-3" style="display:none;"></div>
+            <!-- New: Settlement Info -->
+            <div id="settlementInfo" class="mb-3" style="display:none;"></div>
+            <div id="chartsContainer" class="row" style="display:none;">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">Monthly Expenses</div>
+                        <div class="card-body">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-success text-white">Weekly Expenses</div>
+                        <div class="card-body">
+                            <canvas id="weeklyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="next-section" class="container text-center mt-5" style="display:none;">
+            <h2 class="fw-bold text-success">Next Page</h2>
+            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80"
+                alt="Bill splitting" class="rounded shadow mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+            <p class="lead">Proceed with bill splitting or other features...</p>
+        </div>
+
+        <p id="launchingSoon" class="text-center mt-4 text-info fw-bold">Launching Soon.</p>
+    </main>
+
+    <footer class="bg-primary text-white text-center py-3 mt-5 shadow">
+        <p>&copy; 2025 Bill Buddies</p>
+        <p>Build By SAPAPM'e Team For Vibe Code</p>
+    </footer>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Existing variables
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const homeSection = document.getElementById('home-section');
+        const buddySection = document.getElementById('buddy-section');
+        const nextSection = document.getElementById('next-section');
+        const addBuddyBtn = document.getElementById('addBuddyBtn');
+        const deleteBuddyBtn = document.getElementById('deleteBuddyBtn');
+        const buddyTableBody = document.getElementById('buddyTableBody');
+        const nextBtn = document.getElementById('nextBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const launchingSoon = document.getElementById('launchingSoon');
+        const selectAll = document.getElementById('selectAll');
+
+        // New variables for expenses section
+        const expensesSection = document.getElementById('expenses-section');
+        const expensesTableBody = document.getElementById('expensesTableBody');
+        const backBtn = document.getElementById('backBtn');
+        const payerBtn = document.getElementById('payerBtn');
+        const payeeBtn = document.getElementById('payeeBtn');
+        const expenseChartBtn = document.getElementById('expenseChartBtn');
+        const payerInfo = document.getElementById('payerInfo');
+        const payeeInfo = document.getElementById('payeeInfo');
+        const chartsContainer = document.getElementById('chartsContainer');
+        // New: Settlement Info
+        const settlementInfo = document.getElementById('settlementInfo');
+
+        // Store buddies and expenses
+        let buddies = [];
+        let expenses = [];
+
+        getStartedBtn.onclick = function() {
+            homeSection.style.display = 'none';
+            buddySection.style.display = '';
+            launchingSoon.style.display = 'none';
+        };
+
+        addBuddyBtn.onclick = function() {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="checkbox" class="buddy-check"></td>
+                <td><input type="text" class="form-control" name="name[]" required></td>
+                <td><input type="number" class="form-control" name="age[]" min="1" required></td>
+                <td>
+                    <select class="form-select" name="gender[]" required>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </td>
+                <td><input type="date" class="form-control" name="joiningDate[]" required></td>
+            `;
+            buddyTableBody.appendChild(row);
+        };
+
+        deleteBuddyBtn.onclick = function() {
+            const checks = buddyTableBody.querySelectorAll('.buddy-check');
+            checks.forEach(check => {
+                if (check.checked) {
+                    check.closest('tr').remove();
+                }
+            });
+            selectAll.checked = false;
+        };
+
+        selectAll.onclick = function() {
+            const checks = buddyTableBody.querySelectorAll('.buddy-check');
+            checks.forEach(check => {
+                check.checked = selectAll.checked;
+            });
+        };
+
+        buddyTableBody.addEventListener('change', function(e) {
+            if (e.target.classList.contains('buddy-check')) {
+                const checks = buddyTableBody.querySelectorAll('.buddy-check');
+                selectAll.checked = Array.from(checks).every(check => check.checked);
+            }
+        });
+
+        nextBtn.onclick = function() {
+            // Collect buddies
+            buddies = [];
+            const rows = buddyTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const name = row.querySelector('input[name="name[]"]').value.trim();
+                if (name) {
+                    buddies.push({
+                        name,
+                        age: row.querySelector('input[name="age[]"]').value,
+                        gender: row.querySelector('select[name="gender[]"]').value,
+                        joiningDate: row.querySelector('input[name="joiningDate[]"]').value,
+                        expenses: [],
+                        paidAmount: 0,
+                        paidDate: '',
+                        pendingAmount: 0
+                    });
+                }
+            });
+            if (buddies.length === 0) {
+                alert('Please add at least one buddy.');
+                return;
+            }
+            buddySection.style.display = 'none';
+            expensesSection.style.display = '';
+            launchingSoon.style.display = 'none';
+            renderExpensesTable();
+        };
+
+        cancelBtn.onclick = function() {
+            buddySection.style.display = 'none';
+            homeSection.style.display = '';
+            launchingSoon.style.display = '';
+        };
+
+        backBtn.onclick = function() {
+            expensesSection.style.display = 'none';
+            buddySection.style.display = '';
+            payerInfo.style.display = 'none';
+            payeeInfo.style.display = 'none';
+            chartsContainer.style.display = 'none';
+            settlementInfo.style.display = 'none';
+        };
+
+        payerBtn.onclick = function() {
+            payerInfo.style.display = '';
+            payeeInfo.style.display = 'none';
+            chartsContainer.style.display = 'none';
+            settlementInfo.style.display = 'none';
+            payerInfo.innerHTML = '';
+            // Find payers (who paid more than average)
+            const avgPaid = buddies.reduce((sum, b) => sum + Number(b.paidAmount || 0), 0) / buddies.length;
+            buddies.forEach(b => {
+                if (Number(b.paidAmount) > avgPaid) {
+                    payerInfo.innerHTML += `<div class="alert alert-danger mb-2">
+                        <strong>${b.name}</strong> paid <b>₹${b.paidAmount || 0}</b> to payees.
+                    </div>`;
+                }
+            });
+            if (!payerInfo.innerHTML) payerInfo.innerHTML = '<div class="alert alert-warning">No payer found.</div>';
+        };
+
+        payeeBtn.onclick = function() {
+            payeeInfo.style.display = '';
+            payerInfo.style.display = 'none';
+            chartsContainer.style.display = 'none';
+            payeeInfo.innerHTML = '';
+            // Find payees (who will receive)
+            const avgPaid = buddies.reduce((sum, b) => sum + Number(b.paidAmount || 0), 0) / buddies.length;
+            buddies.forEach(b => {
+                if (Number(b.paidAmount) < avgPaid) {
+                    payeeInfo.innerHTML += `<div class="alert alert-success mb-2">
+                        <strong>${b.name}</strong> will receive <b>₹${b.pendingAmount || 0}</b> from payers.
+                    </div>`;
+                }
+            });
+            if (!payeeInfo.innerHTML) payeeInfo.innerHTML = '<div class="alert alert-warning">No payee found.</div>';
+            // Show settlement info
+            showSettlementInfo();
+        };
+
+        expenseChartBtn.onclick = function() {
+            payerInfo.style.display = 'none';
+            payeeInfo.style.display = 'none';
+            chartsContainer.style.display = '';
+            settlementInfo.style.display = 'none';
+            renderCharts();
+        };
+
+        // Render Expenses Table
+        function renderExpensesTable() {
+            expensesTableBody.innerHTML = '';
+            buddies.forEach((buddy, idx) => {
+                expensesTableBody.innerHTML += `
+                    <tr>
+                        <td>${buddy.name}</td>
+                        <td>
+                            <input type="text" class="form-control expense-detail" data-idx="${idx}" placeholder="Expense details">
+                        </td>
+                        <td>
+                            <input type="number" class="form-control paid-amount" data-idx="${idx}" min="0" value="${buddy.paidAmount}">
+                        </td>
+                        <td>
+                            <input type="date" class="form-control paid-date" data-idx="${idx}" value="${buddy.paidDate}">
+                        </td>
+                        <td>
+                            <span class="pending-amount" data-idx="${idx}">₹${buddy.pendingAmount || 0}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            // Add event listeners for inputs
+            document.querySelectorAll('.paid-amount').forEach(input => {
+                input.addEventListener('input', updatePendingAmounts);
+            });
+            document.querySelectorAll('.paid-date').forEach(input => {
+                input.addEventListener('change', e => {
+                    const idx = e.target.dataset.idx;
+                    buddies[idx].paidDate = e.target.value;
+                });
+            });
+            document.querySelectorAll('.expense-detail').forEach(input => {
+                input.addEventListener('input', e => {
+                    const idx = e.target.dataset.idx;
+                    buddies[idx].expenses[0] = e.target.value;
+                });
+            });
+        }
+
+        // Calculate pending amounts and update table
+        function updatePendingAmounts() {
+            let totalPaid = 0;
+            buddies.forEach((b, idx) => {
+                const paidInput = document.querySelector(`.paid-amount[data-idx="${idx}"]`);
+                b.paidAmount = Number(paidInput.value) || 0;
+                totalPaid += b.paidAmount;
+            });
+            const avgPaid = totalPaid / buddies.length;
+            buddies.forEach((b, idx) => {
+                b.pendingAmount = Math.round(avgPaid - b.paidAmount);
+                const pendingSpan = document.querySelector(`.pending-amount[data-idx="${idx}"]`);
+                pendingSpan.textContent = `₹${b.pendingAmount}`;
+                pendingSpan.className = 'pending-amount fw-bold ' + (b.pendingAmount < 0 ? 'text-danger' : b.pendingAmount > 0 ? 'text-success' : 'text-secondary');
+            });
+        }
+
+        // Chart rendering
+        function renderCharts() {
+            // Dummy data for charts
+            const labels = buddies.map(b => b.name);
+            const monthlyData = buddies.map(b => b.paidAmount || 0);
+            const weeklyData = buddies.map(b => Math.round((b.paidAmount || 0) / 4));
+
+            // Monthly Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            if (window.monthlyChartInstance) window.monthlyChartInstance.destroy();
+            window.monthlyChartInstance = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Monthly Expenses',
+                        data: monthlyData,
+                        backgroundColor: 'rgba(13,110,253,0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Weekly Chart
+            const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+            if (window.weeklyChartInstance) window.weeklyChartInstance.destroy();
+            window.weeklyChartInstance = new Chart(weeklyCtx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Weekly Expenses',
+                        data: weeklyData,
+                        backgroundColor: 'rgba(25,135,84,0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Settlement calculation and display
+        function showSettlementInfo() {
+            // Only show when payeeBtn is clicked
+            settlementInfo.style.display = '';
+            // Calculate net balances
+            let netBalances = buddies.map(b => ({
+                name: b.name,
+                balance: Math.round((b.paidAmount || 0) - (b.pendingAmount ? -b.pendingAmount : 0)) // paidAmount - (avgPaid - paidAmount)
+            }));
+
+            // More correct: net = paidAmount - fairShare
+            let totalPaid = buddies.reduce((sum, b) => sum + Number(b.paidAmount || 0), 0);
+            let avgPaid = totalPaid / buddies.length;
+            netBalances = buddies.map(b => ({
+                name: b.name,
+                balance: Math.round((b.paidAmount || 0) - avgPaid)
+            }));
+
+            // Separate creditors (positive balance) and debtors (negative balance)
+            let creditors = netBalances.filter(b => b.balance > 0).map(b => ({...b}));
+            let debtors = netBalances.filter(b => b.balance < 0).map(b => ({...b}));
+
+            // Settlement logic
+            let settlements = [];
+            let i = 0, j = 0;
+            while (i < debtors.length && j < creditors.length) {
+                let debtor = debtors[i];
+                let creditor = creditors[j];
+                let amount = Math.min(Math.abs(debtor.balance), creditor.balance);
+                if (amount > 0) {
+                    settlements.push({
+                        from: debtor.name,
+                        to: creditor.name,
+                        amount
+                    });
+                    debtor.balance += amount;
+                    creditor.balance -= amount;
+                }
+                if (Math.abs(debtor.balance) < 1e-2) i++;
+                if (creditor.balance < 1e-2) j++;
+            }
+
+            // Render settlement info
+            if (settlements.length === 0) {
+                settlementInfo.innerHTML = '<div class="alert alert-info">All balances are settled.</div>';
+            } else {
+                settlementInfo.innerHTML = `<h5>Settlement Instructions</h5>`;
+                settlements.forEach(s => {
+                    settlementInfo.innerHTML += `<div class="alert alert-warning mb-2"><strong>${s.from}</strong> needs to pay <b>₹${s.amount}</b> to <strong>${s.to}</strong></div>`;
+                });
+            }
+        }
+    </script>
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
